@@ -17,16 +17,19 @@ struct coordinate {
 };
 
 
-struct rabbit {
-    int X;
-    int Y;
+class Object{
+    coordinate coo;
+};
+
+class Animal : Object{
     int age;
+};
+
+class Rabbit : Animal {
     int last_procreation;
 };
 
-struct fox {
-    coordinate coo;
-    int age;
+class Fox : Animal {
     int last_procreation;
     int last_meal;
 };
