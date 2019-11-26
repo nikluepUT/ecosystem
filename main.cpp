@@ -1,5 +1,8 @@
 #include <iostream>
 #include <string>
+#include <vector>
+
+//using namespace std;
 
 enum Object_t : unsigned {
     EMPTY = 0u,
@@ -8,9 +11,33 @@ enum Object_t : unsigned {
     FOX
 };
 
+struct coordinate {
+    int X;
+    int Y;
+};
+
+
+struct rabbit {
+    int X;
+    int Y;
+    int age;
+    int last_procreation;
+};
+
+struct fox {
+    coordinate coo;
+    int age;
+    int last_procreation;
+    int last_meal;
+};
+
+
 void printDetailedWorld(const unsigned* const* world);
-
-
+void tmp_move_rabbits(unsigned* const* world, int generation);
+void move_rabbit(unsigned *const *world, int generation, int X, int Y);
+void move_fox(unsigned *const *world, int generation, int X, int Y);
+std::vector<coordinate>
+check_adjacent_cells_for_condition(const unsigned *const *world, Object_t condition, int X, int Y);
 
 unsigned readVal() {
     unsigned val;
@@ -45,8 +72,12 @@ int main() {
         }
     }
 
+    for (int generation = 0; generation < N_GEN; generation++){
+        std::cout << "\nGen " << generation << std::endl;
+        printDetailedWorld(world);
 
-    printDetailedWorld(world);
+        tmp_move_rabbits(world, generation);
+    }
     return EXIT_SUCCESS;
 }
 
@@ -88,4 +119,115 @@ void printDetailedWorld(const unsigned *const *world)  {
 
     printLine();
     std::cout << std::endl;
+}
+
+void tmp_move_rabbits(unsigned* const* world, int generation) {
+    std::vector<coordinate> rabbits;
+    std::vector<coordinate> foxes;
+
+    for (int i = 0; i < R; ++i) {
+        for (int j = 0; j < C; ++j) {
+            switch (world[i][j]) {
+                case Object_t::RABBIT:
+                    rabbits.push_back(coordinate{i,j});
+                    break;
+                case Object_t::FOX:
+                    foxes.push_back(coordinate{i,j});
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    std::cout << "Iterating through rabbits:" << std::endl;
+    for (int i = 0; i < rabbits.size(); ++i){
+        move_rabbit(world, generation, rabbits[i].X, rabbits[i].Y);
+    }
+
+    std::cout << "\nIterating through foxes:" << std::endl;
+    for (int i = 0; i < foxes.size(); ++i){
+        move_fox(world, generation, foxes[i].X, foxes[i].Y);
+    }
+}
+
+void move_rabbit(unsigned *const *world, int generation, int X, int Y){
+    std::cout << "Calculate move for rabbit (" << X << "," << Y << ")" << std::endl;
+
+    std::vector<coordinate> free_cells = check_adjacent_cells_for_condition(world, EMPTY, X, Y);
+
+    if (free_cells.size() > 0){
+        int seleted_cell = 0;
+        if (free_cells.size() > 1){
+            seleted_cell = (generation + X + Y) % free_cells.size();
+        }
+        std::cout << free_cells.size() << " free cells available, pick: (" << free_cells[seleted_cell].X << "," << free_cells[seleted_cell].Y << ")" << std::endl;
+        world[free_cells[seleted_cell].X][free_cells[seleted_cell].Y] = RABBIT;
+
+        //TODO: decide if procreate or not
+        if (true) {
+            world[X][Y] = EMPTY;
+        }
+    }
+}
+
+void move_fox(unsigned *const *world, int generation, int X, int Y){
+    std::cout << "Calculate move for fox (" << X << "," << Y << ")" << std::endl;
+
+    std::vector<coordinate> adjacent_rabbits = check_adjacent_cells_for_condition(world, RABBIT, X, Y);
+
+    if (adjacent_rabbits.size() > 0){
+        int seleted_cell = 0;
+        if (adjacent_rabbits.size() > 1){
+            seleted_cell = (generation + X + Y) % adjacent_rabbits.size();
+        }
+        std::cout << adjacent_rabbits.size() << " adjacent rabbits available, eat: (" << adjacent_rabbits[seleted_cell].X << "," << adjacent_rabbits[seleted_cell].Y << ")" << std::endl;
+        world[adjacent_rabbits[seleted_cell].X][adjacent_rabbits[seleted_cell].Y] = FOX;
+        //TODO: reset last meal
+
+        //TODO: decide if procreate or not
+        if (true) {
+            world[X][Y] = EMPTY;
+        }
+    }
+    else {
+        std::vector<coordinate> free_cells = check_adjacent_cells_for_condition(world, EMPTY, X, Y);
+        if (free_cells.size() > 0){
+            int seleted_cell = 0;
+            if (free_cells.size() > 1){
+                seleted_cell = (generation + X + Y) % free_cells.size();
+            }
+            std::cout << free_cells.size() << " free cells available, pick: (" << free_cells[seleted_cell].X << "," << free_cells[seleted_cell].Y << ")" << std::endl;
+            world[free_cells[seleted_cell].X][free_cells[seleted_cell].Y] = FOX;
+
+            //TODO: decide if procreate or not
+            if (true) {
+                world[X][Y] = EMPTY;
+            }
+        }
+    }
+}
+
+std::vector<coordinate> check_adjacent_cells_for_condition(const unsigned *const *world, Object_t condition, int X, int Y) {
+    std::vector<coordinate> selected_cells;
+    selected_cells.reserve(4);
+
+    // check cell north
+    if (X > 0 && world[X-1][Y] == condition){
+        selected_cells.push_back({X - 1, Y});
+    }
+    // check cell east
+    if (Y < R-1 && world[X][Y+1] == condition){
+        selected_cells.push_back(coordinate{X, Y + 1});
+    }
+    // check cell south
+    if (X < C-1 && world[X+1][Y] == condition){
+        selected_cells.push_back(coordinate{X + 1, Y});
+    }
+    // check cell west
+    if (Y > 0 && world[X][Y-1] == condition){
+        selected_cells.push_back(coordinate{X, Y - 1});
+    }
+
+    return selected_cells;
 }
