@@ -1,10 +1,11 @@
 #include "Field.h"
 
+Field::~Field(){}
 
 Field::Field(const unsigned x, const unsigned y, const Field_t type)
     : m_coords{x, y}, m_collisions{}, m_type(type) {
-
 }
+
 
 void Field::addCollision(const Direction_t dir, Field *field) {
     m_collisions[dir] = field;

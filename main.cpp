@@ -9,29 +9,14 @@ struct coordinate {
     int Y;
 };
 
-
-struct rabbit {
-    int X;
-    int Y;
-    int age;
-    int last_procreation;
-};
-
-struct fox {
-    coordinate coo;
-    int age;
-    int last_procreation;
-    int last_meal;
-};
-
-
-void printDetailedWorld(const unsigned* const* world);
-void tmp_move_rabbits(unsigned* const* world, int generation);
-void move_rabbit(unsigned *const *world, int generation, int X, int Y);
-void move_fox(unsigned *const *world, int generation, int X, int Y);
+void printDetailedWorld(const Field_t* const* world);
+/*
+void tmp_move_rabbits(Field_t* const* world, int generation);
+void move_rabbit(Field_t *const *world, int generation, int X, int Y);
+void move_fox(Field_t *const *world, int generation, int X, int Y);
 std::vector<coordinate>
-check_adjacent_cells_for_condition(const unsigned *const *world, Object_t condition, int X, int Y);
-
+check_adjacent_cells_for_condition(const Field_t *const *world, Field_t condition, int X, int Y);
+*/
 unsigned readVal() {
     unsigned val;
     std::cin >> val;
@@ -45,10 +30,10 @@ const auto GEN_PROC_RABBITS = readVal(), GEN_PROC_FOXES = readVal(), GEN_FOOD_FO
 
 int main() {
 
-    auto world = new unsigned*[R];
+    auto world = new Field_t*[R];
     for (auto i = 0u; i < R; ++i) {
-        world[i] = new unsigned[C];
-        std::fill(world[i], world[i] + C, Object_t::EMPTY);
+        world[i] = new Field_t[C];
+        std::fill(world[i], world[i] + C, Field_t::EMPTY);
     }
 
     for (auto i = 0u; i < N; ++i) {
@@ -57,11 +42,11 @@ int main() {
 
         std::cin >> type >> x >> y;
         if (type == "ROCK") {
-            world[x][y] = Object_t::ROCK;
+            world[x][y] = Field_t::ROCK;
         } else if (type == "RABBIT") {
-            world[x][y] = Object_t::RABBIT;
+            world[x][y] = Field_t::RABBIT;
         } else if (type == "FOX") {
-            world[x][y] = Object_t::FOX;
+            world[x][y] = Field_t::FOX;
         }
     }
 
@@ -69,12 +54,12 @@ int main() {
         std::cout << "\nGen " << generation << std::endl;
         printDetailedWorld(world);
 
-        tmp_move_rabbits(world, generation);
+        //tmp_move_rabbits(world, generation);
     }
     return EXIT_SUCCESS;
 }
 
-void printDetailedWorld(const unsigned *const *world)  {
+void printDetailedWorld(const Field_t *const *world)  {
     auto printLine = []() {
         std::cout << '+';
         for (auto i = 0u; i < 2*C + 1; ++i) {
@@ -91,16 +76,16 @@ void printDetailedWorld(const unsigned *const *world)  {
         for (auto j = 0u; j < C; ++j) {
             std::cout << ' ';
             switch (world[i][j]) {
-                case Object_t::ROCK:
+                case Field_t::ROCK:
                     std::cout << '*';
                     break;
-                case Object_t::RABBIT:
+                case Field_t::RABBIT:
                     std::cout << 'R';
                     break;
-                case Object_t::FOX:
+                case Field_t::FOX:
                     std::cout << 'F';
                     break;
-                case Object_t::EMPTY:
+                case Field_t::EMPTY:
                 default:
                     std::cout << ' ';
                     break;
@@ -114,17 +99,18 @@ void printDetailedWorld(const unsigned *const *world)  {
     std::cout << std::endl;
 }
 
-void tmp_move_rabbits(unsigned* const* world, int generation) {
+/*
+void tmp_move_rabbits(Field_t* const* world, int generation) {
     std::vector<coordinate> rabbits;
     std::vector<coordinate> foxes;
 
     for (int i = 0; i < R; ++i) {
         for (int j = 0; j < C; ++j) {
             switch (world[i][j]) {
-                case Object_t::RABBIT:
+                case Field_t::RABBIT:
                     rabbits.push_back(coordinate{i,j});
                     break;
-                case Object_t::FOX:
+                case Field_t::FOX:
                     foxes.push_back(coordinate{i,j});
                     break;
                 default:
@@ -144,7 +130,7 @@ void tmp_move_rabbits(unsigned* const* world, int generation) {
     }
 }
 
-void move_rabbit(unsigned *const *world, int generation, int X, int Y){
+void move_rabbit(Field_t *const *world, int generation, int X, int Y){
     std::cout << "Calculate move for rabbit (" << X << "," << Y << ")" << std::endl;
 
     std::vector<coordinate> free_cells = check_adjacent_cells_for_condition(world, EMPTY, X, Y);
@@ -164,7 +150,7 @@ void move_rabbit(unsigned *const *world, int generation, int X, int Y){
     }
 }
 
-void move_fox(unsigned *const *world, int generation, int X, int Y){
+void move_fox(Field_t *const *world, int generation, int X, int Y){
     std::cout << "Calculate move for fox (" << X << "," << Y << ")" << std::endl;
 
     std::vector<coordinate> adjacent_rabbits = check_adjacent_cells_for_condition(world, RABBIT, X, Y);
@@ -201,7 +187,7 @@ void move_fox(unsigned *const *world, int generation, int X, int Y){
     }
 }
 
-std::vector<coordinate> check_adjacent_cells_for_condition(const unsigned *const *world, Object_t condition, int X, int Y) {
+std::vector<coordinate> check_adjacent_cells_for_condition(const Field_t *const *world, Field_t condition, int X, int Y) {
     std::vector<coordinate> selected_cells;
     selected_cells.reserve(4);
 
@@ -224,3 +210,4 @@ std::vector<coordinate> check_adjacent_cells_for_condition(const unsigned *const
 
     return selected_cells;
 }
+ */
