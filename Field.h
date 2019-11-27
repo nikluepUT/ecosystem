@@ -1,7 +1,7 @@
 #pragma once
-//
-// Created by nikluep on 27/11/2019.
-//
+
+
+#include <vector>
 
 enum Direction_t : unsigned {
     NORTH = 0u,
@@ -18,6 +18,8 @@ enum Field_t : unsigned {
     FOX
 };
 
+
+
 class Field {
 public:
     Field(const unsigned x, const unsigned y, const Field_t type);
@@ -31,6 +33,8 @@ public:
     const unsigned* getCoords() const { return m_coords; };
 
     Field_t getType() const { return m_type; };
+
+    static std::vector<std::vector<Field*>> world;
 protected:
     Field* m_collisions[5];
 private:

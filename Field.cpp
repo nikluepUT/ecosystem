@@ -1,10 +1,5 @@
-//
-// Created by nikluep on 27/11/2019.
-//
-
 #include "Field.h"
 
-#include <vector>
 
 Field::Field(const unsigned x, const unsigned y, const Field_t type)
     : m_coords{x, y}, m_collisions{}, m_type(type) {
