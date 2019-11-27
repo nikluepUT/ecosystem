@@ -2,14 +2,7 @@
 #include <string>
 #include <vector>
 
-//using namespace std;
-
-enum Object_t : unsigned {
-    EMPTY = 0u,
-    ROCK,
-    RABBIT,
-    FOX
-};
+#include "Field.h"
 
 struct coordinate {
     int X;
