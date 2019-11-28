@@ -44,7 +44,7 @@ void Field::move(World_t &world, const Field_t movingType) {
     auto livingEntity = dynamic_cast<LivingEntity*>(m_entity.get());
     Field* moveTarget = nullptr;
     Direction_t direction = Direction_t::SIZE;
-    if (!livingEntity->computeMove(world, m_coords, &direction, moveTarget)) {
+    if (!livingEntity->computeMove(world, m_coords, &direction, &moveTarget)) {
         return;
     }
 

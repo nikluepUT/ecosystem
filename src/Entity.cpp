@@ -13,7 +13,7 @@ LivingEntity::LivingEntity(const Field_t type)
 }
 
 bool
-LivingEntity::computeMove(const World_t &world, const unsigned *coords, Direction_t *direction, Field *target) const {
+LivingEntity::computeMove(const World_t &world, const unsigned *coords, Direction_t *direction, Field **target) const {
     //TODO: implement
     return false;
 }
