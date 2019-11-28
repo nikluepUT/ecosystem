@@ -8,6 +8,9 @@
 class Field;
 class Entity;
 
+
+using World_t = std::vector<std::vector<Field>>;
+
 class Field {
 public:
     Field(const unsigned x, const unsigned y);
@@ -23,3 +26,5 @@ private:
     std::unique_ptr<Entity> m_entity;
     std::unique_ptr<Entity> m_collisions[static_cast<unsigned>(Direction_t::SIZE)];
 };
+
+

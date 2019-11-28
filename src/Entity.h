@@ -1,8 +1,7 @@
 #pragma once
 
 #include "utils.h"
-
-class Field;
+#include "Field.h"
 
 class Entity {
 public:
