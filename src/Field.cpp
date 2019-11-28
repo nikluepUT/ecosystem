@@ -26,14 +26,12 @@ void Field::addEntity(const Field_t newType) {
 }
 
 void Field::move(World_t &world, const Field_t movingType) {
-    if (!m_entity) {
+    // only move if type matches
+    if (!m_entity || m_entity->getType() != movingType) {
         return;
     }
 
-    if (m_entity->getType() != movingType) {
-        return;
-    }
-
+    // kill starving foxes
     if (movingType == Field_t::FOX) {
         auto foxEntity = dynamic_cast<const Fox*>(m_entity.get());
         if (foxEntity->isStarving()) {
@@ -42,6 +40,7 @@ void Field::move(World_t &world, const Field_t movingType) {
         }
     }
 
+    // compute move by animal
     auto livingEntity = dynamic_cast<LivingEntity*>(m_entity.get());
     Field* moveTarget = nullptr;
     Direction_t direction = Direction_t::SIZE;
@@ -49,7 +48,7 @@ void Field::move(World_t &world, const Field_t movingType) {
         return;
     }
 
-
+    // execute move and reproduce if possible
     moveTarget->addCollision(std::move(m_entity), direction); // -> m_entity = nullptr
     if (livingEntity->canReproduce()) {
         livingEntity->reproduce();
@@ -62,6 +61,7 @@ void Field::addCollision(std::unique_ptr<Entity> newEntity, const Direction_t di
 }
 
 void Field::resolveCollisions(const Field_t movingType) {
+    // compute the surviving entity,
     std::unique_ptr<Entity>* survivor = nullptr;
     if (movingType == Field_t::RABBIT) {
         survivor  = std::max_element(
@@ -82,15 +82,23 @@ void Field::resolveCollisions(const Field_t movingType) {
                         else return *dynamic_cast<Fox*>(lhs.get()) > *dynamic_cast<Fox*>(lhs.get());
                 });
     }
+
+    // check if there is one at all
     if (!survivor || !*survivor) {
         return;
     }
 
+    // finalize move by survivor, let fox eat if possible
     if (movingType == Field_t::FOX && !m_entity && m_entity->getType() == Field_t::RABBIT) {
         auto foxEntity = dynamic_cast<Fox*>(survivor->get());
         foxEntity->eatRabbit();
     }
     m_entity = std::move(*survivor);
+
+    // kill all other contestants
+    for (auto& pEntity : m_collisions) {
+        pEntity = nullptr;
+    }
 }
 
 Field_t Field::getContainedType() const {

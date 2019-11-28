@@ -22,11 +22,13 @@ check_adjacent_cells_for_condition(const Field_t *const *world, Field_t conditio
 
 int main() {
 
+    // init config variables
     unsigned N_GEN, R, C, N;
     std::cin >> Rabbit::GEN_PROC;
     std::cin >> Fox::GEN_PROC >> Fox::GEN_FOOD;
     std::cin >> N_GEN >> R >> C >> N;
 
+    // init world
     World_t world;
     world.reserve(R);
     for (auto x = 0u; x < R; ++x) {
@@ -38,6 +40,7 @@ int main() {
     }
 
 
+    // init entities
     for (auto i = 0u; i < N; ++i) {
         std::string sType;
         Field_t type = Field_t::EMPTY;
@@ -57,11 +60,13 @@ int main() {
         }
     }
 
+    // simulate ecosystem
     for (auto generation = 0u; generation < N_GEN; generation++){
         std::cout << "\nGen " << generation << std::endl;
         prettyPrintWorld(world);
     }
 
+    // DONE
     std::cout << std::endl << "Final: " << std::endl;
     prettyPrintWorld(world);
 
@@ -69,6 +74,7 @@ int main() {
 }
 
 void prettyPrintWorld(const World_t& world)  {
+    // print a complete line of '-' encased by '+'
     auto printLine = [&]() {
         std::cout << '+';
         for (size_t i = 0; i < 2*world[0].size() + 1; ++i) {
@@ -76,6 +82,8 @@ void prettyPrintWorld(const World_t& world)  {
         }
         std::cout << '+' << '\n';
     };
+
+
 
     printLine();
 
