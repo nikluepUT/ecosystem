@@ -64,19 +64,23 @@ void Field::addCollision(std::unique_ptr<Entity> newEntity, const Direction_t di
 void Field::resolveCollisions(const Field_t movingType) {
     std::unique_ptr<Entity>* survivor = nullptr;
     if (movingType == Field_t::RABBIT) {
-        survivor  = std::max_element(std::begin(m_collisions), std::end(m_collisions),
-                                     [](const std::unique_ptr<Entity>& lhs, const std::unique_ptr<Entity>& rhs) {
-                                         if (!lhs) return false;
-                                         else if (!rhs) return true;
-                                         else return *dynamic_cast<Rabbit*>(lhs.get()) > *dynamic_cast<Rabbit*>(lhs.get());
-                                     });
+        survivor  = std::max_element(
+                std::begin(m_collisions),
+                std::end(m_collisions),
+                [](const std::unique_ptr<Entity>& lhs, const std::unique_ptr<Entity>& rhs) {
+                        if (!lhs) return false;
+                        else if (!rhs) return true;
+                        else return *dynamic_cast<Rabbit*>(lhs.get()) > *dynamic_cast<Rabbit*>(lhs.get());
+                });
     } else if (movingType == Field_t::FOX) {
-        survivor  = std::max_element(std::begin(m_collisions), std::end(m_collisions),
-                                     [](const std::unique_ptr<Entity>& lhs, const std::unique_ptr<Entity>& rhs) {
-                                         if (!lhs) return false;
-                                         else if (!rhs) return true;
-                                         else return *dynamic_cast<Fox*>(lhs.get()) > *dynamic_cast<Fox*>(lhs.get());
-                                     });
+        survivor  = std::max_element(
+                std::begin(m_collisions),
+                std::end(m_collisions),
+                [](const std::unique_ptr<Entity>& lhs, const std::unique_ptr<Entity>& rhs) {
+                        if (!lhs) return false;
+                        else if (!rhs) return true;
+                        else return *dynamic_cast<Fox*>(lhs.get()) > *dynamic_cast<Fox*>(lhs.get());
+                });
     }
     if (!survivor || !*survivor) {
         return;
