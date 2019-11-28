@@ -1,10 +1,28 @@
-#include "World.h"
-#include <memory>
 #include <algorithm>
+
+#include "Field.h"
+#include "Entity.h"
 
 
 Field::Field(const unsigned x, const unsigned y)
-    : m_coords{x, y}, m_entity(nullptr), m_collisions{} {
+        : m_coords{x, y}, m_entity(nullptr), m_collisions{} {
+}
+
+
+void Field::addEntity(const Field_t newType) {
+    switch (newType) {
+        case Field_t::ROCK:
+            m_entity = std::make_unique<Rock>();
+            break;
+        case Field_t::RABBIT:
+            m_entity = std::make_unique<Rabbit>();
+            break;
+        case Field_t::FOX:
+            m_entity = std::make_unique<Fox>();
+            break;
+        default:
+            return;
+    }
 }
 
 void Field::move(World_t &world, const Field_t movingType) {
@@ -27,7 +45,7 @@ void Field::move(World_t &world, const Field_t movingType) {
     auto livingEntity = dynamic_cast<LivingEntity*>(m_entity.get());
     Field* moveTarget = nullptr;
     Direction_t direction = Direction_t::SIZE;
-    if (!livingEntity->computeMove(world, moveTarget, &direction, m_coords)) {
+    if (!livingEntity->computeMove(world, m_coords, &direction, moveTarget)) {
         return;
     }
 
@@ -47,18 +65,18 @@ void Field::resolveCollisions(const Field_t movingType) {
     std::unique_ptr<Entity>* survivor = nullptr;
     if (movingType == Field_t::RABBIT) {
         survivor  = std::max_element(std::begin(m_collisions), std::end(m_collisions),
-                [](const std::unique_ptr<Entity>& lhs, const std::unique_ptr<Entity>& rhs) {
-                    if (!lhs) return false;
-                    else if (!rhs) return true;
-                    else return *dynamic_cast<Rabbit*>(lhs.get()) > *dynamic_cast<Rabbit*>(lhs.get());
-        });
+                                     [](const std::unique_ptr<Entity>& lhs, const std::unique_ptr<Entity>& rhs) {
+                                         if (!lhs) return false;
+                                         else if (!rhs) return true;
+                                         else return *dynamic_cast<Rabbit*>(lhs.get()) > *dynamic_cast<Rabbit*>(lhs.get());
+                                     });
     } else if (movingType == Field_t::FOX) {
         survivor  = std::max_element(std::begin(m_collisions), std::end(m_collisions),
-                [](const std::unique_ptr<Entity>& lhs, const std::unique_ptr<Entity>& rhs) {
-                    if (!lhs) return false;
-                    else if (!rhs) return true;
-                    else return *dynamic_cast<Fox*>(lhs.get()) > *dynamic_cast<Fox*>(lhs.get());
-        });
+                                     [](const std::unique_ptr<Entity>& lhs, const std::unique_ptr<Entity>& rhs) {
+                                         if (!lhs) return false;
+                                         else if (!rhs) return true;
+                                         else return *dynamic_cast<Fox*>(lhs.get()) > *dynamic_cast<Fox*>(lhs.get());
+                                     });
     }
     if (!survivor || !*survivor) {
         return;
@@ -79,37 +97,3 @@ Field_t Field::getContainedType() const {
     return m_entity->getType();
 }
 
-Entity::Entity(const Field_t type)
-    : m_type(type) {
-}
-
-Rock::Rock()
-    : Entity(Field_t::ROCK) {
-}
-
-LivingEntity::LivingEntity(const Field_t type)
-    : Entity(type), m_age(0), m_proc{0} {
-}
-
-bool LivingEntity::computeMove(const World_t &world, Field *target, Direction_t *direction, const unsigned *coords) const {
-    //TODO: implement
-    return false;
-}
-
-void LivingEntity::incrementAge() {
-    ++m_age;
-    ++m_proc;
-}
-
-Rabbit::Rabbit()
-    : LivingEntity(Field_t::RABBIT) {
-}
-
-Fox::Fox()
-    : LivingEntity(Field_t::FOX), m_hunger(0) {
-}
-
-void Fox::incrementAge() {
-    LivingEntity::incrementAge();
-    ++m_hunger;
-}

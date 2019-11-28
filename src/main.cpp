@@ -3,13 +3,15 @@
 #include <vector>
 
 #include "Field.h"
+#include "Entity.h"
+#include "utils.h"
 
 struct coordinate {
     int X;
     int Y;
 };
 
-void printDetailedWorld(const Field_t* const* world);
+void prettyPrintWorld(const World_t& world);
 /*
 void tmp_move_rabbits(Field_t* const* world, int generation);
 void move_rabbit(Field_t *const *world, int generation, int X, int Y);
@@ -17,52 +19,59 @@ void move_fox(Field_t *const *world, int generation, int X, int Y);
 std::vector<coordinate>
 check_adjacent_cells_for_condition(const Field_t *const *world, Field_t condition, int X, int Y);
 */
-unsigned readVal() {
-    unsigned val;
-    std::cin >> val;
-    return val;
-}
-
-// globals that wont change throughout the runtime
-const auto GEN_PROC_RABBITS = readVal(), GEN_PROC_FOXES = readVal(), GEN_FOOD_FOXES = readVal(),
-        N_GEN = readVal(), R = readVal(), C = readVal(), N = readVal();
-
 
 int main() {
 
-    auto world = new Field_t*[R];
-    for (auto i = 0u; i < R; ++i) {
-        world[i] = new Field_t[C];
-        std::fill(world[i], world[i] + C, Field_t::EMPTY);
-    }
+    unsigned N_GEN, R, C, N;
+    std::cin >> Rabbit::GEN_PROC;
+    std::cin >> Fox::GEN_PROC >> Fox::GEN_FOOD;
+    std::cin >> N_GEN >> R >> C >> N;
 
-    for (auto i = 0u; i < N; ++i) {
-        std::string type;
-        unsigned x, y;
-
-        std::cin >> type >> x >> y;
-        if (type == "ROCK") {
-            world[x][y] = Field_t::ROCK;
-        } else if (type == "RABBIT") {
-            world[x][y] = Field_t::RABBIT;
-        } else if (type == "FOX") {
-            world[x][y] = Field_t::FOX;
+    World_t world;
+    world.reserve(R);
+    for (auto x = 0u; x < R; ++x) {
+        world.emplace_back();
+        world[x].reserve(C);
+        for (auto y = 0u; y < C; ++y) {
+            world[x].emplace_back(x, y);
         }
     }
 
-    for (int generation = 0; generation < N_GEN; generation++){
-        std::cout << "\nGen " << generation << std::endl;
-        printDetailedWorld(world);
 
-        //tmp_move_rabbits(world, generation);
+    for (auto i = 0u; i < N; ++i) {
+        std::string sType;
+        Field_t type = Field_t::EMPTY;
+        unsigned x, y;
+
+        std::cin >> sType >> x >> y;
+        if (sType == "ROCK") {
+            type = Field_t::ROCK;
+        } else if (sType == "RABBIT") {
+            type = Field_t::RABBIT;
+        } else if (sType == "FOX") {
+            type = Field_t::FOX;
+        }
+
+        if (type != Field_t::EMPTY) {
+            world[x][y].addEntity(type);
+        }
     }
+
+    for (auto generation = 0u; generation < N_GEN; generation++){
+        std::cout << "\nGen " << generation << std::endl;
+        prettyPrintWorld(world);
+    }
+
+    std::cout << std::endl << "Final: " << std::endl;
+    prettyPrintWorld(world);
+
     return EXIT_SUCCESS;
 }
 
-void printDetailedWorld(const Field_t *const *world)  {
-    auto printLine = []() {
+void prettyPrintWorld(const World_t& world)  {
+    auto printLine = [&]() {
         std::cout << '+';
-        for (auto i = 0u; i < 2*C + 1; ++i) {
+        for (size_t i = 0; i < 2*world[0].size() + 1; ++i) {
             std::cout << '-';
         }
         std::cout << '+' << '\n';
@@ -70,12 +79,12 @@ void printDetailedWorld(const Field_t *const *world)  {
 
     printLine();
 
-    for (auto i = 0u; i < R; ++i) {
+    for (size_t i = 0; i < world.size(); ++i) {
         std::cout << '|';
 
-        for (auto j = 0u; j < C; ++j) {
+        for (size_t j = 0u; j < world[0].size(); ++j) {
             std::cout << ' ';
-            switch (world[i][j]) {
+            switch (world[i][j].getContainedType()) {
                 case Field_t::ROCK:
                     std::cout << '*';
                     break;
