@@ -12,6 +12,7 @@ struct coordinate {
 };
 
 void prettyPrintWorld(const World_t& world);
+void tmp_test_move(World_t& world, const unsigned generation, Field_t animal);
 /*
 void tmp_move_rabbits(Field_t* const* world, int generation);
 void move_rabbit(Field_t *const *world, int generation, int X, int Y);
@@ -61,9 +62,14 @@ int main() {
     }
 
     // simulate ecosystem
-    for (auto generation = 0u; generation < N_GEN; generation++){
+    for (unsigned generation = 0u; generation < N_GEN; generation++){
         std::cout << "\nGen " << generation << std::endl;
         prettyPrintWorld(world);
+
+        tmp_test_move(world, generation, Field_t::FOX);
+        //TODO: resolve fox conflicts
+        tmp_test_move(world, generation, Field_t::RABBIT);
+        //TODO: resolve rabbit conflicts
     }
 
     // DONE
@@ -115,6 +121,21 @@ void prettyPrintWorld(const World_t& world)  {
     printLine();
     std::cout << std::endl;
 }
+
+
+void tmp_test_move(World_t& world, const unsigned generation, Field_t animal){
+
+
+    for (size_t i = 0; i < world.size(); ++i) {
+        for (size_t j = 0u; j < world[0].size(); ++j) {
+            if (world[i][j].getContainedType() == animal){
+                world[i][j].move(world, world[i][j].getContainedType(), generation);
+                //return;
+            }
+        }
+    }
+}
+
 
 /*
 void tmp_move_rabbits(Field_t* const* world, int generation) {

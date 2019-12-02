@@ -16,7 +16,7 @@ public:
     Field(const unsigned x, const unsigned y);
 
     void addEntity(const Field_t newType);
-    void move(World_t &world, const Field_t movingType);
+    void move(World_t &world, const Field_t movingType, const unsigned generation);
     void addCollision(std::unique_ptr<Entity> newEntity, const Direction_t direction);
     void resolveCollisions(const Field_t movingType);
 

@@ -24,7 +24,7 @@ class LivingEntity : public Entity {
 public:
     ~LivingEntity() override = default;
 
-    bool computeMove(const World_t &world, const unsigned *coords, Direction_t *direction, Field **target) const;
+    bool computeMove(const World_t &world, const unsigned *coords, Direction_t *direction, Field **target, const unsigned generation) const;
     bool canReproduce() const;
     void reproduce() { m_proc = 0; };
 
