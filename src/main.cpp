@@ -12,14 +12,8 @@ struct coordinate {
 };
 
 void prettyPrintWorld(const World_t& world);
-void tmp_test_move(World_t& world, const unsigned generation, Field_t animal);
-/*
-void tmp_move_rabbits(Field_t* const* world, int generation);
-void move_rabbit(Field_t *const *world, int generation, int X, int Y);
-void move_fox(Field_t *const *world, int generation, int X, int Y);
-std::vector<coordinate>
-check_adjacent_cells_for_condition(const Field_t *const *world, Field_t condition, int X, int Y);
-*/
+void moveAnimal(World_t& world, const unsigned generation, Field_t animal);
+void resolveCollisionForAnimal(World_t& world, Field_t animal);
 
 int main() {
 
@@ -66,10 +60,10 @@ int main() {
         std::cout << "\nGen " << generation << std::endl;
         prettyPrintWorld(world);
 
-        tmp_test_move(world, generation, Field_t::FOX);
-        //TODO: resolve fox conflicts
-        tmp_test_move(world, generation, Field_t::RABBIT);
-        //TODO: resolve rabbit conflicts
+        moveAnimal(world, generation, Field_t::FOX);
+        resolveCollisionForAnimal(world, Field_t::FOX);
+        moveAnimal(world, generation, Field_t::RABBIT);
+        resolveCollisionForAnimal(world, Field_t::RABBIT);
     }
 
     // DONE
@@ -123,129 +117,24 @@ void prettyPrintWorld(const World_t& world)  {
 }
 
 
-void tmp_test_move(World_t& world, const unsigned generation, Field_t animal){
-
-
+void moveAnimal(World_t& world, const unsigned generation, Field_t animal){
     for (size_t i = 0; i < world.size(); ++i) {
         for (size_t j = 0u; j < world[0].size(); ++j) {
             if (world[i][j].getContainedType() == animal){
                 world[i][j].move(world, world[i][j].getContainedType(), generation);
-                //return;
             }
         }
     }
 }
 
-
-/*
-void tmp_move_rabbits(Field_t* const* world, int generation) {
-    std::vector<coordinate> rabbits;
-    std::vector<coordinate> foxes;
-
-    for (int i = 0; i < R; ++i) {
-        for (int j = 0; j < C; ++j) {
-            switch (world[i][j]) {
-                case Field_t::RABBIT:
-                    rabbits.push_back(coordinate{i,j});
-                    break;
-                case Field_t::FOX:
-                    foxes.push_back(coordinate{i,j});
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-
-    std::cout << "Iterating through rabbits:" << std::endl;
-    for (int i = 0; i < rabbits.size(); ++i){
-        move_rabbit(world, generation, rabbits[i].X, rabbits[i].Y);
-    }
-
-    std::cout << "\nIterating through foxes:" << std::endl;
-    for (int i = 0; i < foxes.size(); ++i){
-        move_fox(world, generation, foxes[i].X, foxes[i].Y);
-    }
-}
-
-void move_rabbit(Field_t *const *world, int generation, int X, int Y){
-    std::cout << "Calculate move for rabbit (" << X << "," << Y << ")" << std::endl;
-
-    std::vector<coordinate> free_cells = check_adjacent_cells_for_condition(world, EMPTY, X, Y);
-
-    if (free_cells.size() > 0){
-        int seleted_cell = 0;
-        if (free_cells.size() > 1){
-            seleted_cell = (generation + X + Y) % free_cells.size();
-        }
-        std::cout << free_cells.size() << " free cells available, pick: (" << free_cells[seleted_cell].X << "," << free_cells[seleted_cell].Y << ")" << std::endl;
-        world[free_cells[seleted_cell].X][free_cells[seleted_cell].Y] = RABBIT;
-
-        //TODO: decide if procreate or not
-        if (true) {
-            world[X][Y] = EMPTY;
-        }
-    }
-}
-
-void move_fox(Field_t *const *world, int generation, int X, int Y){
-    std::cout << "Calculate move for fox (" << X << "," << Y << ")" << std::endl;
-
-    std::vector<coordinate> adjacent_rabbits = check_adjacent_cells_for_condition(world, RABBIT, X, Y);
-
-    if (adjacent_rabbits.size() > 0){
-        int seleted_cell = 0;
-        if (adjacent_rabbits.size() > 1){
-            seleted_cell = (generation + X + Y) % adjacent_rabbits.size();
-        }
-        std::cout << adjacent_rabbits.size() << " adjacent rabbits available, eat: (" << adjacent_rabbits[seleted_cell].X << "," << adjacent_rabbits[seleted_cell].Y << ")" << std::endl;
-        world[adjacent_rabbits[seleted_cell].X][adjacent_rabbits[seleted_cell].Y] = FOX;
-        //TODO: reset last meal
-
-        //TODO: decide if procreate or not
-        if (true) {
-            world[X][Y] = EMPTY;
-        }
-    }
-    else {
-        std::vector<coordinate> free_cells = check_adjacent_cells_for_condition(world, EMPTY, X, Y);
-        if (free_cells.size() > 0){
-            int seleted_cell = 0;
-            if (free_cells.size() > 1){
-                seleted_cell = (generation + X + Y) % free_cells.size();
-            }
-            std::cout << free_cells.size() << " free cells available, pick: (" << free_cells[seleted_cell].X << "," << free_cells[seleted_cell].Y << ")" << std::endl;
-            world[free_cells[seleted_cell].X][free_cells[seleted_cell].Y] = FOX;
-
-            //TODO: decide if procreate or not
-            if (true) {
-                world[X][Y] = EMPTY;
+void resolveCollisionForAnimal(World_t& world, Field_t animal){
+    for (size_t i = 0; i < world.size(); ++i) {
+        for (size_t j = 0u; j < world[0].size(); ++j) {
+            if (world[i][j].getContainedType() == animal){
+                std::cout << "animal found" << std::endl;
+                world[i][j].resolveCollisions(world[i][j].getContainedType());
             }
         }
     }
 }
 
-std::vector<coordinate> check_adjacent_cells_for_condition(const Field_t *const *world, Field_t condition, int X, int Y) {
-    std::vector<coordinate> selected_cells;
-    selected_cells.reserve(4);
-
-    // check cell north
-    if (X > 0 && world[X-1][Y] == condition){
-        selected_cells.push_back({X - 1, Y});
-    }
-    // check cell east
-    if (Y < R-1 && world[X][Y+1] == condition){
-        selected_cells.push_back(coordinate{X, Y + 1});
-    }
-    // check cell south
-    if (X < C-1 && world[X+1][Y] == condition){
-        selected_cells.push_back(coordinate{X + 1, Y});
-    }
-    // check cell west
-    if (Y > 0 && world[X][Y-1] == condition){
-        selected_cells.push_back(coordinate{X, Y - 1});
-    }
-
-    return selected_cells;
-}
- */
