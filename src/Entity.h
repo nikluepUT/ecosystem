@@ -15,7 +15,7 @@ private:
     const Field_t m_type;
 };
 
-class Rock : public Entity {
+class Rock final: public Entity {
 public:
     Rock();
 };
@@ -24,7 +24,8 @@ class LivingEntity : public Entity {
 public:
     ~LivingEntity() override = default;
 
-    bool computeMove(const World_t &world, const unsigned *coords, Direction_t *direction, Field **target, const unsigned generation) const;
+    virtual bool computeMove(World_t &world, const unsigned *coords, const unsigned generation, Field **target,
+                     Direction_t *direction) const;
     bool canReproduce() const;
     void reproduce() { m_proc = 0; };
 
@@ -41,7 +42,7 @@ private:
 };
 
 
-class Rabbit : public LivingEntity {
+class Rabbit final: public LivingEntity {
 public:
     Rabbit();
 
@@ -49,7 +50,7 @@ public:
 };
 
 
-class Fox : public LivingEntity {
+class Fox final : public LivingEntity {
 public:
     Fox();
 
@@ -57,7 +58,10 @@ public:
     void eatRabbit() { m_hunger = 0; }
 
     void incrementAge() override;
-    unsigned getHunger() const { return m_hunger; };
+    unsigned getHunger() const { return m_hunger; }
+
+    bool computeMove(World_t &world, const unsigned *coords, const unsigned generation, Field **target,
+                     Direction_t *direction) const override;;
 
     static unsigned GEN_PROC, GEN_FOOD;
 

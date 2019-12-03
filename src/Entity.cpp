@@ -1,6 +1,8 @@
 #include <iostream>
 #include "Entity.h"
 
+#include <vector>
+
 Entity::Entity(const Field_t type)
         : m_type(type) {
 }
@@ -14,90 +16,51 @@ LivingEntity::LivingEntity(const Field_t type)
 }
 
 
-std::vector<std::pair<Field*, Direction_t>> check_adjacent_cells_for_condition(const World_t &world, const unsigned *coords, Field_t condition){
-    unsigned X = coords[0];
-    unsigned Y = coords[1];
+std::vector<std::pair<Field*, Direction_t>> checkAdjacentCellsForCondition(World_t &world, const unsigned *coords, const Field_t condition){
+    const unsigned x = coords[0], y = coords[1];
 
     std::vector<std::pair<Field*, Direction_t>> selected_cells;
 
     // check cell north
-    if (X > 0 && world[X-1][Y].getContainedType() == condition){
-        //std::cout << "North free" << std::endl;
-        selected_cells.push_back(std::pair<Field*, Direction_t>((Field *const) &world[X-1][Y], Direction_t::NORTH));
+    if (x > 0 && world[x - 1][y].getContainedType() == condition){
+        selected_cells.emplace_back(&world[x - 1][y], Direction_t::NORTH);
     }
     // check cell east
-    if (Y < world.size()-1 && world[X][Y+1].getContainedType() == condition){
-        //std::cout << "East free" << std::endl;
-        selected_cells.push_back(std::pair<Field*, Direction_t>((Field *const) &world[X][Y+1], Direction_t::EAST));
+    if (y < world.size() - 1 && world[x][y + 1].getContainedType() == condition){
+        selected_cells.emplace_back(&world[x][y + 1], Direction_t::EAST);
     }
     // check cell south
-    if (X < world.at(0).size()-1 && world[X+1][Y].getContainedType() == condition){
-        //std::cout << "South free" << std::endl;
-        selected_cells.push_back(std::pair<Field*, Direction_t>((Field *const) &world[X+1][Y], Direction_t::SOUTH));
+    if (x < world.at(0).size() - 1 && world[x + 1][y].getContainedType() == condition){
+        selected_cells.emplace_back(&world[x + 1][y], Direction_t::SOUTH);
     }
     // check cell west
-    if (Y > 0 && world[X][Y-1].getContainedType() == condition){
-        //std::cout << "West free" << std::endl;
-        selected_cells.push_back(std::pair<Field*, Direction_t>((Field *const) &world[X][Y-1], Direction_t::WEST));
+    if (y > 0 && world[x][y - 1].getContainedType() == condition){
+        selected_cells.emplace_back(&world[x][y - 1], Direction_t::WEST);
     }
 
     return selected_cells;
 }
 
-bool
-LivingEntity::computeMove(const World_t &world, const unsigned *coords, Direction_t *direction, Field **target, const unsigned generation) const {
-    const auto type = getType();
+bool selectTarget(const unsigned *coords, const unsigned generation,
+        const std::vector<std::pair<Field*, Direction_t>>& freeCells, Direction_t *direction, Field **target) {
 
+    if (!freeCells.empty()) {
 
-    if (type == Field_t::RABBIT){
-        //std::cout << "Move rabbit" << std::endl;
-
-        std::vector<std::pair<Field*, Direction_t>> free_cells = check_adjacent_cells_for_condition(world, coords, Field_t::EMPTY);
-        if (free_cells.size() > 0){
-            unsigned selected_cell = 0;
-            if (free_cells.size() > 1){
-                selected_cell = (generation + coords[0] + coords[1]) % free_cells.size();
-            }
-
-            //std::cout << "selected cell: " << selected_cell << std::endl;
-            *target = free_cells.at(selected_cell).first;
-            *direction = free_cells.at(selected_cell).second;
-            return true;
-        }
-        return false;
-    }
-    if (type == Field_t::FOX){
-        //std::cout << "Move fox" << std::endl;
-        std::vector<std::pair<Field*, Direction_t>> adjacent_rabbits = check_adjacent_cells_for_condition(world, coords, Field_t::RABBIT);
-        if (adjacent_rabbits.size() > 0){
-            unsigned selected_cell = 0;
-            if (adjacent_rabbits.size() > 1){
-                selected_cell = (generation + coords[0] + coords[1]) % adjacent_rabbits.size();
-            }
-
-            //std::cout << "selected rabbit: " << selected_cell << std::endl;
-            *target = adjacent_rabbits.at(selected_cell).first;
-            *direction = adjacent_rabbits.at(selected_cell).second;
-            return true;
-        }
-        else {
-            //std::cout << "No adjacent rabbit" << std::endl;
-            std::vector<std::pair<Field*, Direction_t>> free_cells = check_adjacent_cells_for_condition(world, coords, Field_t::EMPTY);
-            if (free_cells.size() > 0){
-                unsigned selected_cell = 0;
-                if (free_cells.size() > 1){
-                    selected_cell = (generation + coords[0] + coords[1]) % free_cells.size();
-                }
-
-                //std::cout << "selected cell: " << selected_cell << std::endl;
-                *target = free_cells.at(selected_cell).first;
-                *direction = free_cells.at(selected_cell).second;
-                return true;
-            }
-            return false;
-        }
+        unsigned selected_cell = (generation + coords[0] + coords[1]) % freeCells.size();
+        *target = freeCells.at(selected_cell).first;
+        *direction = freeCells.at(selected_cell).second;
+        return true;
     }
     return false;
+}
+
+
+bool
+LivingEntity::computeMove(World_t &world, const unsigned *coords, const unsigned generation, Field **target,
+                          Direction_t *direction) const {
+
+    const auto freeCells = checkAdjacentCellsForCondition(world, coords, Field_t::EMPTY);
+    return selectTarget(coords, generation, freeCells, direction, target);
 }
 
 
@@ -135,4 +98,13 @@ Fox::Fox()
 void Fox::incrementAge() {
     LivingEntity::incrementAge();
     ++m_hunger;
+}
+
+bool Fox::computeMove(World_t &world, const unsigned *coords, const unsigned generation, Field **target,
+                      Direction_t *direction) const {
+    const auto adjacentRabbits = checkAdjacentCellsForCondition(world, coords, Field_t::RABBIT);
+    if (selectTarget(coords, generation, adjacentRabbits, direction, target)) {
+        return true;
+    }
+    return LivingEntity::computeMove(world, coords, generation, target, direction);
 }

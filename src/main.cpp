@@ -56,7 +56,7 @@ int main() {
     }
 
     // simulate ecosystem
-    for (unsigned generation = 0u; generation < N_GEN; generation++){
+    for (auto generation = 0u; generation < N_GEN; ++generation){
         std::cout << "\nGen " << generation << std::endl;
         prettyPrintWorld(world);
 

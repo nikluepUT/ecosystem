@@ -11,7 +11,7 @@ class Entity;
 
 using World_t = std::vector<std::vector<Field>>;
 
-class Field {
+class Field final {
 public:
     Field(const unsigned x, const unsigned y);
 
