@@ -30,6 +30,8 @@ public:
 
     virtual void incrementAge();
 
+    unsigned getAge() const { return m_age; };
+
 protected:
     explicit LivingEntity(const Field_t type);
 
@@ -55,6 +57,7 @@ public:
     void eatRabbit() { m_hunger = 0; }
 
     void incrementAge() override;
+    unsigned getHunger() const { return m_hunger; };
 
     static unsigned GEN_PROC, GEN_FOOD;
 
@@ -62,6 +65,9 @@ private:
     unsigned m_hunger;
 };
 
-inline bool operator> (const Rabbit& lhs, const Rabbit& rhs) { return false; };
-inline bool operator> (const Fox& lhs, const Fox& rhs) { return false; };
+inline bool operator< (const Rabbit& lhs, const Rabbit& rhs) { return lhs.getAge() < rhs.getAge(); };
+inline bool operator< (const Fox& lhs, const Fox& rhs) {
+    if (lhs.getAge() == rhs.getAge()) return lhs.getHunger() > rhs.getHunger();
+    else return lhs.getAge() < rhs.getAge();
+};
 

@@ -120,9 +120,7 @@ void prettyPrintWorld(const World_t& world)  {
 void moveAnimal(World_t& world, const unsigned generation, Field_t animal){
     for (size_t i = 0; i < world.size(); ++i) {
         for (size_t j = 0u; j < world[0].size(); ++j) {
-            if (world[i][j].getContainedType() == animal){
-                world[i][j].move(world, world[i][j].getContainedType(), generation);
-            }
+                world[i][j].move(world, animal, generation);
         }
     }
 }
@@ -130,10 +128,7 @@ void moveAnimal(World_t& world, const unsigned generation, Field_t animal){
 void resolveCollisionForAnimal(World_t& world, Field_t animal){
     for (size_t i = 0; i < world.size(); ++i) {
         for (size_t j = 0u; j < world[0].size(); ++j) {
-            if (world[i][j].getContainedType() == animal){
-                std::cout << "animal found" << std::endl;
-                world[i][j].resolveCollisions(world[i][j].getContainedType());
-            }
+            world[i][j].resolveCollisions(animal);
         }
     }
 }

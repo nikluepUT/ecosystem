@@ -64,32 +64,32 @@ void Field::resolveCollisions(const Field_t movingType) {
     // compute the surviving entity,
     std::unique_ptr<Entity>* survivor = nullptr;
     if (movingType == Field_t::RABBIT) {
-        survivor  = std::max_element(
+        survivor = std::max_element(
                 std::begin(m_collisions),
                 std::end(m_collisions),
                 [](const std::unique_ptr<Entity>& lhs, const std::unique_ptr<Entity>& rhs) {
-                        if (!lhs) return false;
-                        else if (!rhs) return true;
-                        else return *dynamic_cast<Rabbit*>(lhs.get()) > *dynamic_cast<Rabbit*>(lhs.get());
+                        if (!lhs) return true;
+                        else if (!rhs) return false;
+                        else return *dynamic_cast<Rabbit*>(lhs.get()) < *dynamic_cast<Rabbit*>(lhs.get());
                 });
     } else if (movingType == Field_t::FOX) {
-        survivor  = std::max_element(
+        survivor = std::max_element(
                 std::begin(m_collisions),
                 std::end(m_collisions),
                 [](const std::unique_ptr<Entity>& lhs, const std::unique_ptr<Entity>& rhs) {
-                        if (!lhs) return false;
-                        else if (!rhs) return true;
-                        else return *dynamic_cast<Fox*>(lhs.get()) > *dynamic_cast<Fox*>(lhs.get());
+                        if (!lhs) return true;
+                        else if (!rhs) return false;
+                        else return *dynamic_cast<Fox*>(lhs.get()) < *dynamic_cast<Fox*>(lhs.get());
                 });
     }
 
     // check if there is one at all
-    if (!survivor || !*survivor) {
+    if (!*survivor) {
         return;
     }
 
     // finalize move by survivor, let fox eat if possible
-    if (movingType == Field_t::FOX && !m_entity && m_entity->getType() == Field_t::RABBIT) {
+    if (movingType == Field_t::FOX && m_entity && m_entity->getType() == Field_t::RABBIT) {
         auto foxEntity = dynamic_cast<Fox*>(survivor->get());
         foxEntity->eatRabbit();
     }
