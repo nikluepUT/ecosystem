@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <omp.h>
 
 #include "Field.h"
 #include "Entity.h"
@@ -16,6 +17,7 @@ void moveAnimal(World_t& world, const unsigned generation, Field_t animal);
 void resolveCollisionForAnimal(World_t& world, Field_t animal);
 
 int main() {
+
 
     // init config variables
     unsigned N_GEN, R, C, N;
@@ -56,9 +58,20 @@ int main() {
     }
 
     // simulate ecosystem
-    for (auto generation = 0u; generation < N_GEN; ++generation){
-        std::cout << "\nGen " << generation << std::endl;
-        prettyPrintWorld(world);
+#pragma omp parallel default(none) shared(N_GEN, world, std::cout)
+{
+#pragma omp master
+    {
+        const auto numThreads = omp_get_num_threads();
+        std::cout << "Running with " << numThreads << " threads!" << std::endl;
+    };
+    for (auto generation = 0u; generation < N_GEN; ++generation) {
+#pragma omp master
+        {
+            std::cout << "\nGen " << generation << std::endl;
+            prettyPrintWorld(world);
+        }
+#pragma omp barrier
 
         moveAnimal(world, generation, Field_t::FOX);
         resolveCollisionForAnimal(world, Field_t::FOX);
@@ -66,6 +79,7 @@ int main() {
         resolveCollisionForAnimal(world, Field_t::RABBIT);
     }
 
+}
     // DONE
     std::cout << std::endl << "Final: " << std::endl;
     prettyPrintWorld(world);
@@ -118,18 +132,22 @@ void prettyPrintWorld(const World_t& world)  {
 
 
 void moveAnimal(World_t& world, const unsigned generation, Field_t animal){
+#pragma omp for collapse(2)
     for (size_t i = 0; i < world.size(); ++i) {
         for (size_t j = 0u; j < world[0].size(); ++j) {
                 world[i][j].move(world, animal, generation);
         }
     }
+#pragma omp barrier
 }
 
 void resolveCollisionForAnimal(World_t& world, Field_t animal){
+#pragma omp for collapse(2)
     for (size_t i = 0; i < world.size(); ++i) {
         for (size_t j = 0u; j < world[0].size(); ++j) {
             world[i][j].resolveCollisions(animal);
         }
     }
+#pragma omp barrier
 }
 

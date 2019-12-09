@@ -27,7 +27,7 @@ public:
     virtual bool computeMove(World_t &world, const unsigned *coords, const unsigned generation, Field **target,
                      Direction_t *direction) const;
     bool canReproduce() const;
-    void reproduce() { m_proc = 0; };
+    virtual std::shared_ptr<LivingEntity> reproduce() = 0;
 
     virtual void incrementAge();
 
@@ -35,16 +35,18 @@ public:
 
 protected:
     explicit LivingEntity(const Field_t type);
+    unsigned m_proc;
 
 private:
     unsigned m_age;
-    unsigned m_proc;
 };
 
 
 class Rabbit final: public LivingEntity {
 public:
     Rabbit();
+
+    std::shared_ptr<LivingEntity> reproduce() override;
 
     static unsigned GEN_PROC;
 };
@@ -61,7 +63,9 @@ public:
     unsigned getHunger() const { return m_hunger; }
 
     bool computeMove(World_t &world, const unsigned *coords, const unsigned generation, Field **target,
-                     Direction_t *direction) const override;;
+                     Direction_t *direction) const override;
+
+    std::shared_ptr<LivingEntity> reproduce() override;;
 
     static unsigned GEN_PROC, GEN_FOOD;
 

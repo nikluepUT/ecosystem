@@ -87,6 +87,11 @@ Rabbit::Rabbit()
         : LivingEntity(Field_t::RABBIT) {
 }
 
+std::shared_ptr<LivingEntity> Rabbit::reproduce() {
+    m_proc = 0;
+    return std::move(std::make_shared<Rabbit>());
+}
+
 
 unsigned Fox::GEN_PROC = 0;
 unsigned Fox::GEN_FOOD = 0;
@@ -107,4 +112,9 @@ bool Fox::computeMove(World_t &world, const unsigned *coords, const unsigned gen
         return true;
     }
     return LivingEntity::computeMove(world, coords, generation, target, direction);
+}
+
+std::shared_ptr<LivingEntity> Fox::reproduce() {
+    m_proc = 0;
+    return std::move(std::make_shared<Fox>());
 }
