@@ -7,11 +7,6 @@
 #include "Entity.h"
 #include "utils.h"
 
-struct coordinate {
-    int X;
-    int Y;
-};
-
 void prettyPrintWorld(const World_t& world);
 void moveAnimal(World_t& world, const unsigned generation, Field_t animal);
 void resolveCollisionForAnimal(World_t& world, Field_t animal);
