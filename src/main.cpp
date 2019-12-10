@@ -57,20 +57,26 @@ int main() {
         }
     }
 
+    double start_time = omp_get_wtime();
+
     // simulate ecosystem
 #pragma omp parallel default(none) shared(N_GEN, world, std::cout)
 {
+    /*
 #pragma omp master
     {
         const auto numThreads = omp_get_num_threads();
         std::cout << "Running with " << numThreads << " threads!" << std::endl;
     };
+     */
     for (auto generation = 0u; generation < N_GEN; ++generation) {
+        /*
 #pragma omp master
         {
             std::cout << "\nGen " << generation << std::endl;
             prettyPrintWorld(world);
         }
+         */
 #pragma omp barrier
 
         moveAnimal(world, generation, Field_t::FOX);
@@ -80,9 +86,12 @@ int main() {
     }
 
 }
+    double time = omp_get_wtime() - start_time;
+
     // DONE
     std::cout << std::endl << "Final: " << std::endl;
     prettyPrintWorld(world);
+    std::cout << "Time: " << time*1000 << "ms" << std::endl;
 
     return EXIT_SUCCESS;
 }

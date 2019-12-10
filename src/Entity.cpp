@@ -73,7 +73,7 @@ bool LivingEntity::canReproduce() const {
     const auto type = getType();
     switch (type) {
         case Field_t::RABBIT:
-            return m_proc >= Rabbit::GEN_PROC;
+           return m_proc >= Rabbit::GEN_PROC;
         case Field_t::FOX:
             return m_proc >= Fox::GEN_PROC;
         default:
