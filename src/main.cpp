@@ -78,10 +78,10 @@ int main() {
         }
 #pragma omp barrier
 
-        moveAnimal(world, generation, Field_t::FOX);
-        resolveCollisionForAnimal(world, Field_t::FOX);
-        moveAnimal(world, generation, Field_t::RABBIT);
+        moveAnimal(world, generation + 1, Field_t::RABBIT);
         resolveCollisionForAnimal(world, Field_t::RABBIT);
+        moveAnimal(world, generation + 1, Field_t::FOX);
+        resolveCollisionForAnimal(world, Field_t::FOX);
     }
 
 }
