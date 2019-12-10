@@ -85,7 +85,7 @@ void Field::resolveCollisions(const Field_t movingType) {
                 [](const std::shared_ptr<Entity>& lhs, const std::shared_ptr<Entity>& rhs) {
                         if (!lhs) return true;
                         else if (!rhs) return false;
-                        else return *dynamic_cast<Rabbit*>(lhs.get()) < *dynamic_cast<Rabbit*>(lhs.get());
+                        else return *dynamic_cast<Rabbit*>(lhs.get()) < *dynamic_cast<Rabbit*>(rhs.get());
                 });
     } else if (movingType == Field_t::FOX) {
         survivor = std::max_element(
@@ -94,7 +94,7 @@ void Field::resolveCollisions(const Field_t movingType) {
                 [](const std::shared_ptr<Entity>& lhs, const std::shared_ptr<Entity>& rhs) {
                         if (!lhs) return true;
                         else if (!rhs) return false;
-                        else return *dynamic_cast<Fox*>(lhs.get()) < *dynamic_cast<Fox*>(lhs.get());
+                        else return *dynamic_cast<Fox*>(lhs.get()) < *dynamic_cast<Fox*>(rhs.get());
                 });
     }
 
@@ -104,14 +104,11 @@ void Field::resolveCollisions(const Field_t movingType) {
     }
 
     // finalize move by survivor, let fox eat if possible
-    const auto canEat = movingType == Field_t::FOX && m_entity && m_entity->getType() == Field_t::RABBIT;
-    m_entity = *survivor;
-    auto livingEntity = dynamic_cast<LivingEntity *>(m_entity.get());
-
-
-    if (canEat) {
-        dynamic_cast<Fox*>(m_entity.get())->eatRabbit();
+    if (movingType == Field_t::FOX && getContainedType() == Field_t::RABBIT) {
+        dynamic_cast<Fox*>(survivor->get())->eatRabbit();
     }
+    m_entity = *survivor;
+
 
 
     // kill all other contestants
