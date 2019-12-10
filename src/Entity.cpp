@@ -42,15 +42,19 @@ std::vector<std::pair<Field*, Direction_t>> checkAdjacentCellsForCondition(World
 }
 
 bool selectTarget(const unsigned *coords, const unsigned generation,
-        const std::vector<std::pair<Field*, Direction_t>>& freeCells, Direction_t *direction, Field **target) {
+                  const std::vector<std::pair<Field*, Direction_t>>& cells, Direction_t *direction, Field **target) {
 
-    if (!freeCells.empty()) {
+    if (!cells.empty()) {
 
-        unsigned selected_cell = (generation + coords[0] + coords[1]) % freeCells.size();
-        *target = freeCells.at(selected_cell).first;
-        *direction = freeCells.at(selected_cell).second;
+        unsigned selected_cell = (generation + coords[0] + coords[1]) % cells.size();
+        *target = cells.at(selected_cell).first;
+        *direction = cells.at(selected_cell).second;
 
-//        std::cout << "cell " << coords[0] << ':' << coords[1] << " -> " << static_cast<unsigned>(freeCells.at(selected_cell).second) << std::endl;
+//        std::cout
+//                << "cell " << coords[0] << ':' << coords[1] << " -> "
+//                << static_cast<unsigned>(cells.at(selected_cell).second)
+//                << "\t(" << (generation + coords[0] + coords[1]) << " % " << cells.size() << ')'
+//                << std::endl;
         return true;
     }
     return false;

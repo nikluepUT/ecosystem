@@ -44,7 +44,6 @@ void Field::move(World_t &world, const Field_t movingType, const unsigned genera
 
     // compute move by animal
     auto livingEntity = dynamic_cast<LivingEntity*>(m_entity.get());
-    livingEntity->incrementAge();
     Field* moveTarget = nullptr;
     Direction_t direction = Direction_t::SIZE;
     m_hasMove = livingEntity->computeMove(world, m_coords, generation, &moveTarget, &direction);
@@ -65,8 +64,10 @@ void Field::resolveCollisions(const Field_t movingType) {
     if (m_hasMove) {
         auto livingEntity = dynamic_cast<LivingEntity*>(m_entity.get());
         if (livingEntity->canReproduce()) {
+            livingEntity->incrementAge();
             m_entity = livingEntity->reproduce();
         } else {
+            livingEntity->incrementAge();
             m_entity.reset();
         }
         return;
