@@ -75,18 +75,6 @@ void LivingEntity::incrementAge() {
     ++m_proc;
 }
 
-bool LivingEntity::canReproduce() const {
-    const auto type = getType();
-    switch (type) {
-        case Field_t::RABBIT:
-           return m_proc >= Rabbit::GEN_PROC;
-        case Field_t::FOX:
-            return m_proc >= Fox::GEN_PROC;
-        default:
-            return false;
-    }
-}
-
 unsigned Rabbit::GEN_PROC = 0;
 
 Rabbit::Rabbit()
@@ -95,7 +83,11 @@ Rabbit::Rabbit()
 
 std::shared_ptr<LivingEntity> Rabbit::reproduce() {
     m_proc = 0;
-    return std::move(std::make_shared<Rabbit>());
+    return std::make_shared<Rabbit>();
+}
+
+bool Rabbit::canReproduce() const {
+    return getProc() > Rabbit::GEN_PROC;
 }
 
 
@@ -117,10 +109,17 @@ bool Fox::computeMove(World_t &world, const unsigned *coords, const unsigned gen
     if (selectTarget(coords, generation, adjacentRabbits, direction, target)) {
         return true;
     }
-    return LivingEntity::computeMove(world, coords, generation, target, direction);
+    if (!isStarving()) {
+        return LivingEntity::computeMove(world, coords, generation, target, direction);
+    }
+    return false;
 }
 
 std::shared_ptr<LivingEntity> Fox::reproduce() {
     m_proc = 0;
-    return std::move(std::make_shared<Fox>());
+    return std::make_shared<Fox>();
+}
+
+bool Fox::canReproduce() const {
+    return getProc() > Fox::GEN_PROC;
 }

@@ -34,16 +34,9 @@ void Field::move(World_t &world, const Field_t movingType, const unsigned genera
         return;
     }
 
-    // kill starving foxes
-    if (movingType == Field_t::FOX) {
-        auto foxEntity = dynamic_cast<const Fox*>(m_entity.get());
-        if (foxEntity->isStarving()) {
-            return;
-        }
-    }
-
     // compute move by animal
     auto livingEntity = dynamic_cast<LivingEntity*>(m_entity.get());
+    livingEntity->incrementAge();
     Field* moveTarget = nullptr;
     Direction_t direction = Direction_t::SIZE;
     m_hasMove = livingEntity->computeMove(world, m_coords, generation, &moveTarget, &direction);
@@ -60,14 +53,16 @@ void Field::addCollision(std::shared_ptr<Entity> &newEntity, const Direction_t d
 }
 
 void Field::resolveCollisions(const Field_t movingType) {
+    if (getContainedType() == Field_t::ROCK) {
+        return;
+    }
+
     // reproduce if possible, if tile has a move there wont be any further contestants
     if (m_hasMove) {
         auto livingEntity = dynamic_cast<LivingEntity*>(m_entity.get());
         if (livingEntity->canReproduce()) {
-            livingEntity->incrementAge();
             m_entity = livingEntity->reproduce();
         } else {
-            livingEntity->incrementAge();
             m_entity.reset();
         }
         return;
@@ -109,11 +104,15 @@ void Field::resolveCollisions(const Field_t movingType) {
     }
 
     // finalize move by survivor, let fox eat if possible
-    if (movingType == Field_t::FOX && m_entity && m_entity->getType() == Field_t::RABBIT) {
-        auto foxEntity = dynamic_cast<Fox*>(survivor->get());
-        foxEntity->eatRabbit();
-    }
+    const auto canEat = movingType == Field_t::FOX && m_entity && m_entity->getType() == Field_t::RABBIT;
     m_entity = *survivor;
+    auto livingEntity = dynamic_cast<LivingEntity *>(m_entity.get());
+
+
+    if (canEat) {
+        dynamic_cast<Fox*>(m_entity.get())->eatRabbit();
+    }
+
 
     // kill all other contestants
     for (auto& pEntity : m_collisions) {

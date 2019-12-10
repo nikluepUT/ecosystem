@@ -26,12 +26,13 @@ public:
 
     virtual bool computeMove(World_t &world, const unsigned *coords, const unsigned generation, Field **target,
                      Direction_t *direction) const;
-    bool canReproduce() const;
+    virtual bool canReproduce() const = 0;
     virtual std::shared_ptr<LivingEntity> reproduce() = 0;
 
     virtual void incrementAge();
 
-    unsigned getAge() const { return m_age; };
+
+    unsigned getProc() const { return m_proc; };
 
 protected:
     explicit LivingEntity(const Field_t type);
@@ -47,6 +48,8 @@ public:
     Rabbit();
 
     std::shared_ptr<LivingEntity> reproduce() override;
+
+    bool canReproduce() const override;
 
     static unsigned GEN_PROC;
 };
@@ -65,7 +68,9 @@ public:
     bool computeMove(World_t &world, const unsigned *coords, const unsigned generation, Field **target,
                      Direction_t *direction) const override;
 
-    std::shared_ptr<LivingEntity> reproduce() override;;
+    std::shared_ptr<LivingEntity> reproduce() override;
+
+    bool canReproduce() const override;;
 
     static unsigned GEN_PROC, GEN_FOOD;
 
@@ -73,9 +78,9 @@ private:
     unsigned m_hunger;
 };
 
-inline bool operator< (const Rabbit& lhs, const Rabbit& rhs) { return lhs.getAge() < rhs.getAge(); };
+inline bool operator< (const Rabbit& lhs, const Rabbit& rhs) { return lhs.getProc() < rhs.getProc(); };
 inline bool operator< (const Fox& lhs, const Fox& rhs) {
-    if (lhs.getAge() == rhs.getAge()) return lhs.getHunger() > rhs.getHunger();
-    else return lhs.getAge() < rhs.getAge();
+    if (lhs.getProc() == rhs.getProc()) return lhs.getHunger() > rhs.getHunger();
+    else return lhs.getProc() < rhs.getProc();
 };
 
