@@ -12,7 +12,7 @@ Rock::Rock()
 }
 
 LivingEntity::LivingEntity(const Field_t type)
-        : Entity(type), m_age(0), m_proc{0} {
+        : Entity(type), m_age(0), m_proc(0) {
 }
 
 
@@ -49,6 +49,8 @@ bool selectTarget(const unsigned *coords, const unsigned generation,
         unsigned selected_cell = (generation + coords[0] + coords[1]) % freeCells.size();
         *target = freeCells.at(selected_cell).first;
         *direction = freeCells.at(selected_cell).second;
+
+//        std::cout << "cell " << coords[0] << ':' << coords[1] << " -> " << static_cast<unsigned>(freeCells.at(selected_cell).second) << std::endl;
         return true;
     }
     return false;

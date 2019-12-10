@@ -6,7 +6,7 @@
 
 
 Field::Field(const unsigned x, const unsigned y)
-        : m_coords{x, y}, m_entity(nullptr), m_collisions{} {
+        : m_coords{x, y}, m_entity(nullptr), m_collisions{} , m_hasMove(false) {
 }
 
 
@@ -27,17 +27,17 @@ void Field::addEntity(const Field_t newType) {
 }
 
 void Field::move(World_t &world, const Field_t movingType, const unsigned generation) {
+    m_hasMove = false;
+
     // only move if type matches
     if (!m_entity || m_entity->getType() != movingType) {
         return;
     }
 
-
     // kill starving foxes
     if (movingType == Field_t::FOX) {
         auto foxEntity = dynamic_cast<const Fox*>(m_entity.get());
         if (foxEntity->isStarving()) {
-            m_entity = nullptr;
             return;
         }
     }
@@ -47,22 +47,39 @@ void Field::move(World_t &world, const Field_t movingType, const unsigned genera
     livingEntity->incrementAge();
     Field* moveTarget = nullptr;
     Direction_t direction = Direction_t::SIZE;
-    if (!livingEntity->computeMove(world, m_coords, generation, &moveTarget, &direction)) {
+    m_hasMove = livingEntity->computeMove(world, m_coords, generation, &moveTarget, &direction);
+    if (!m_hasMove) {
         return;
     }
 
     // execute move and reproduce if possible
-    moveTarget->addCollision(std::move(m_entity), direction); // -> m_entity = nullptr
-    if (livingEntity->canReproduce()) {
-        m_entity = livingEntity->reproduce();
-    }
+    moveTarget->addCollision(m_entity, direction);
 }
 
-void Field::addCollision(std::shared_ptr<Entity> newEntity, const Direction_t direction) {
-    m_collisions[static_cast<unsigned>(direction)] = std::move(newEntity);
+void Field::addCollision(std::shared_ptr<Entity> &newEntity, const Direction_t direction) {
+    m_collisions[static_cast<unsigned>(direction)] = newEntity;
 }
 
 void Field::resolveCollisions(const Field_t movingType) {
+    // reproduce if possible, if tile has a move there wont be any further contestants
+    if (m_hasMove) {
+        auto livingEntity = dynamic_cast<LivingEntity*>(m_entity.get());
+        if (livingEntity->canReproduce()) {
+            m_entity = livingEntity->reproduce();
+        } else {
+            m_entity.reset();
+        }
+        return;
+    }
+
+    // kill starving foxes
+    if (movingType == Field_t::FOX && m_entity && m_entity->getType() == Field_t::FOX) {
+        auto foxEntity = dynamic_cast<const Fox*>(m_entity.get());
+        if (foxEntity->isStarving()) {
+            m_entity.reset();
+        }
+    }
+
     // compute the surviving entity,
     std::shared_ptr<Entity>* survivor = nullptr;
     if (movingType == Field_t::RABBIT) {
@@ -86,7 +103,7 @@ void Field::resolveCollisions(const Field_t movingType) {
     }
 
     // check if there is one at all
-    if (!*survivor) {
+    if (!survivor || !(*survivor)) {
         return;
     }
 
@@ -95,11 +112,11 @@ void Field::resolveCollisions(const Field_t movingType) {
         auto foxEntity = dynamic_cast<Fox*>(survivor->get());
         foxEntity->eatRabbit();
     }
-    m_entity = std::move(*survivor);
+    m_entity = *survivor;
 
     // kill all other contestants
     for (auto& pEntity : m_collisions) {
-        pEntity = nullptr;
+        pEntity.reset();
     }
 }
 

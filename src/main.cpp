@@ -11,6 +11,8 @@ void prettyPrintWorld(const World_t& world);
 void moveAnimal(World_t& world, const unsigned generation, Field_t animal);
 void resolveCollisionForAnimal(World_t& world, Field_t animal);
 
+#define NUM_THREADS 1
+
 int main() {
 
 
@@ -52,26 +54,28 @@ int main() {
         }
     }
 
+#ifdef _OPENMP
     double start_time = omp_get_wtime();
+#endif
 
     // simulate ecosystem
-#pragma omp parallel default(none) shared(N_GEN, world, std::cout)
+#pragma omp parallel num_threads(NUM_THREADS) default(none) shared(N_GEN, world, std::cout)
 {
-    /*
+#ifdef _OPENMP
 #pragma omp master
     {
         const auto numThreads = omp_get_num_threads();
         std::cout << "Running with " << numThreads << " threads!" << std::endl;
     };
-     */
+#endif
+
     for (auto generation = 0u; generation < N_GEN; ++generation) {
-        /*
+
 #pragma omp master
         {
             std::cout << "\nGen " << generation << std::endl;
             prettyPrintWorld(world);
         }
-         */
 #pragma omp barrier
 
         moveAnimal(world, generation, Field_t::FOX);
@@ -81,13 +85,15 @@ int main() {
     }
 
 }
+#ifdef _OPENMP
     double time = omp_get_wtime() - start_time;
-
+#endif
     // DONE
     std::cout << std::endl << "Final: " << std::endl;
     prettyPrintWorld(world);
+#ifdef _OPENMP
     std::cout << "Time: " << time*1000 << "ms" << std::endl;
-
+#endif
     return EXIT_SUCCESS;
 }
 
