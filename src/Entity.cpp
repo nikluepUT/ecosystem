@@ -1,7 +1,7 @@
-#include <iostream>
+#include <vector>
+
 #include "Entity.h"
 
-#include <vector>
 
 Entity::Entity(const Field_t type)
         : m_type(type) {
